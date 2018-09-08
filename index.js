@@ -5,11 +5,12 @@ var lodash = require('lodash');
 var debug = require('debug');
 var qs = require('querystring');
 var chalk = require('chalk');
+var log = console.log;
 var appCfg = require('./package.json');
 
 var program = require('commander');
 var fs = require('fs');
-var configPath = process.env.NODE_CONFIG_PATH || './.jira/config.json';
+var configPath = process.env.NODE_CONFIG_PATH || (__dirname + '/.jira/config.json');
 var config = {};
 
 if (fs.existsSync(configPath)) {
@@ -22,11 +23,17 @@ if (fs.existsSync(configPath)) {
       pass: ""
     }
   };
-  fs.writeFile(configPath, JSON.stringify(config), function (err) {
-    if (err) return console.log(err);
-    console.log('Your configurations has been initial successfully.');
-  });
+  fs.writeFileSync(configPath, JSON.stringify(config));
+  log(chalk.green('\nYour configuration file has been initial successfully.\n'));
+  log("Set up your credential by below command:\n");
+  log(chalk.italic("\tjira config -u <username> -p <password> -h <host>\n"));
 }
+
+// error on unknown commands
+program.on('command:*', function () {
+  console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+  process.exit(1);
+});
 
 program
   .version(appCfg.version, '-v, --version')
@@ -43,37 +50,28 @@ program
   .option('-p, --pass <pass>', 'JIRA password')
   .action(function (options) {
     if (options.credential) {
-      console.log('Host: ', config.host);
-      console.log('User: ', config.auth.user);
+      log('Host: ', config.host);
+      log('User: ', config.auth.user);
       return;
     }
     if (options.host || options.user || options.pass) {
       if (options.host) {
-        console.log('Host: ', options.host);
+        log('Host: ', options.host);
         lodash.set(config, "host", options.host);
       }
       if (options.user) {
-        console.log('User: ', options.user);
+        log('User: ', options.user);
         lodash.set(config, "auth.user", options.user);
       }
       if (options.pass) {
         lodash.set(config, "auth.pass", options.pass);
       }
-      fs.writeFile(process.env.NODE_CONFIG_DIR + '/default.json', JSON.stringify(config), function (err) {
-        if (err) return console.log(err);
-        console.log('Your configurations has been saved successfully.');
+      fs.writeFile(configPath, JSON.stringify(config), function (err) {
+        if (err) return log(err);
+        log('Your configurations has been saved successfully.');
       });
     }
   })
-
-program.on('command:issues', function () {
-  if(!(config.host || config.auth.user || config.auth.pass)){
-    console.log("Missing credential info.\n");
-    console.log("Set up your credential by below command:\n");
-    console.log(chalk.italic("\tjira config -u username -p password -h host\n"));
-  }
-  process.exit(1);
-});
 
 program
   .command('issues [issueId]')
@@ -81,9 +79,12 @@ program
   .option('-s, --status <status>', 'Filter by status')
   .option('-p, --project <project>', 'Filter by project')
   .option('-sp, --sprint <sprint>', 'Filter by sprint')
+  .option('-l, --max-results <maxResults>', 'set max results')
+  .option('-sa, --start-at <startAt>', 'start at')
   .action(function (issueId, options) {
+    checkCredentials();
     if (issueId) {
-      console.log('issueId: ', issueId);
+      log('issueId: ', issueId);
       issue(issueId);
     } else {
       issues(options);
@@ -91,6 +92,19 @@ program
   });
 
 program.parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+  program.outputHelp(chalk.red);
+}
+
+function checkCredentials() {
+  if (!(config.host || config.auth.user || config.auth.pass)) {
+    log(chalk.red("\nMissing credentials info.\n"));
+    log(chalk.red("Set up your credentials by below command:\n"));
+    log(chalk.red(chalk.italic("\tjira config -u <username> -p <password> -h <host>\n")));
+    process.exit(1);
+  }
+};
 
 if (program.myIssues) {
   issues();
@@ -109,8 +123,8 @@ function issues(options) {
   var queryObj = {
     jql: queryStr,
     fields: "summary",
-    maxResults: 100,
-    startAt: 0
+    maxResults: options.maxResults || 10,
+    startAt: options.startAt || 0
   }
   var qsStr = qs.stringify(queryObj);
   debug('QI:issues')('qsStr: ', qsStr);
@@ -121,11 +135,16 @@ function issues(options) {
     debug('QI:issues')('result: ', result);
     JSON.parse(result).issues.forEach(function (issue) {
       debug('QI:issues:issue')("[" + issue.key + "]" + issue.fields.summary)
-      console.log("[" + issue.key + "]" + issue.fields.summary)
+      log("[" + issue.key + "]" + issue.fields.summary)
     })
   }).catch(function (error) {
     debug('QI:issues')('error: ', (error));
-    console.log('error: ', error.toString());
+    if (error.statusCode == 403) {
+      log('error: ', error.statusCode);
+      log(chalk.red('Invalid host or authentication failed.'))
+      log(chalk.red("Set up your credentials by below command:\n"));
+      log(chalk.red(chalk.italic("\tjira config -u <username> -p <password> -h <host>\n")));
+    }
   })
 }
 
@@ -138,10 +157,9 @@ function issue(issueId) {
     auth: config.auth
   }).then(function (result) {
     debug('QI:issue:result')('result: ', result);
-    console.log('result: ', result);
+    log('result: ', result);
   }).catch(function (error) {
     debug('QI:issue:error')('error: ', (error));
-    console.log('error: ', error.toString());
+    log('error: ', error.toString());
   })
 }
-
