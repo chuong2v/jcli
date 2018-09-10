@@ -63,21 +63,6 @@ program
       lib.issues.fetch(options);
     }
   });
-/**
- * 
- * {
-    "fields": {
-       "project":{
-          "key": "TEST"
-       },
-       "summary": "REST ye merry gentlemen.",
-       "description": "Creating of an issue using project keys and issue type names using the REST API",
-       "issuetype": {
-          "name": "Bug"
-       }
-   }
-}
- */
 
 program
   .command("issues.create [source]")
@@ -85,15 +70,14 @@ program
   .option("--summary <summary>", "summary")
   .option("--assignee <assignee>","assignee name")
   .option("--project <project>","project key")
-  .option("--parent <parent>","parent key")
+  .option("--parent-key <parent>","parent key")
   .option("--components <components>","components")
   .option("--duedate <duedate>","duedate")
   .option("--summary <summary>","summary")
   .option("--description <description>","description")
   .option("--issuetype <issuetype>","issuetype name")
-  .option("--time-estimate <timeestimate>","time estimate")
   .option("--original-estimate <originalEstimate>","original estimate")
-  .option("--remaining-estimate <remainingEstimate>","remaining estimate")
+  .option("--remaining-estimate <remainingEstimate>", "remaining estimate")
   .action((source, options) => {
     lib.utils.checkCredentials();
     if (source) {
