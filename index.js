@@ -49,6 +49,7 @@ program
   .option("-s, --status <status>", "Filter by status")
   .option("-p, --project <project>", "Filter by project")
   .option("-P, --sprint <sprint>", "Filter by sprint")
+  .option("--issuetype <issuetype>", "Filter by issuetype")
   .option("-c, --component <component>", "Filter by component")
   .option("-l, --max-results <maxResults>", "set max results")
   .option("-S, --start-at <startAt>", "start at")
