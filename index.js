@@ -58,6 +58,7 @@ program
   .description("Get issue(s)")
   .action((issueId, options) => {
     lib.utils.checkCredentials();
+    lib.issues.mappings = options;
     if (issueId) {
       lib.issues.get(issueId, options);
     } else {
