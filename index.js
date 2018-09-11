@@ -44,12 +44,12 @@ program
 
 program
   .command("issues [issueId]")
-  .option("-m, --my-issues", "current user")
+  .option("-m, --me", "asigned to current user")
   .option("-q, --query <query>", "sql query")
   .option("-s, --status <status>", "Filter by status")
   .option("-p, --project <project>", "Filter by project")
   .option("-P, --sprint <sprint>", "Filter by sprint")
-  .option("--issuetype <issuetype>", "Filter by issuetype")
+  .option("-t, --issuetype <issuetype>", "Filter by issuetype")
   .option("-c, --component <component>", "Filter by component")
   .option("-l, --max-results <maxResults>", "set max results")
   .option("-S, --start-at <startAt>", "start at")
