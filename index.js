@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 "use strict";
 var appCfg = require("./package.json");
 var lib = require("./lib");
@@ -44,7 +45,7 @@ program
 
 program
   .command("issues [issueId]")
-  .option("-m, --me", "asigned to current user")
+  .option("-M, --me", "asigned to current user")
   .option("-q, --query <query>", "sql query")
   .option("-s, --status <status>", "Filter by status")
   .option("-p, --project <project>", "Filter by project")
@@ -70,15 +71,14 @@ program
   .command("issues.create [source]")
   .description("Create issue")
   .option("--summary <summary>", "summary")
-  .option("--assignee <assignee>","assignee name")
-  .option("--project <project>","project key")
-  .option("--parent-key <parent>","parent key")
-  .option("--components <components>","components")
-  .option("--duedate <duedate>","duedate")
-  .option("--summary <summary>","summary")
-  .option("--description <description>","description")
-  .option("--issuetype <issuetype>","issuetype name")
-  .option("--original-estimate <originalEstimate>","original estimate")
+  .option("--assignee <assignee>", "assignee name")
+  .option("--project <project>", "project key")
+  .option("--parent-key <parent>", "parent key")
+  .option("--components <components>", "components")
+  .option("--duedate <duedate>", "duedate")
+  .option("--description <description>", "description")
+  .option("--issuetype <issuetype>", "issuetype name")
+  .option("--original-estimate <originalEstimate>", "original estimate")
   .option("--remaining-estimate <remainingEstimate>", "remaining estimate")
   .action((source, options) => {
     lib.utils.checkCredentials();
@@ -87,6 +87,24 @@ program
     } else {
       lib.issues.create(options);
     }
+  });
+
+program
+  .command("notes.create <issueKey>")
+  .description("Take notes")
+  .option("-i, --issue-key <issueKey>", "issue key")
+  .option("--summary <summary>", "summary")
+  .option("-m, --message <message>", "message")
+  .action((issueKey, options) => {
+    lib.utils.checkCredentials();
+    lib.issues.create(options);
+  });
+
+program
+  .command("notes")
+  .description("Fetch notes")
+  .action((options) => {
+    lib.notes.issues(options);
   });
 
 program.parse(process.argv);
