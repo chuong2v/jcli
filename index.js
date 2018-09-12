@@ -90,21 +90,26 @@ program
   });
 
 program
-  .command("notes.create <issueKey>")
+  .command("notes.add <issueKey> <message>")
   .description("Take notes")
-  .option("-i, --issue-key <issueKey>", "issue key")
-  .option("--summary <summary>", "summary")
-  .option("-m, --message <message>", "message")
-  .action((issueKey, options) => {
+  .action((issueKey, message, options) => {
     lib.utils.checkCredentials();
-    lib.issues.create(options);
+    lib.notes.add(issueKey, message, options);
   });
 
 program
-  .command("notes")
+  .command("notes.remove <issueKey> [messageKey]")
+  .description("Take notes")
+  .action((issueKey, messageKey, options) => {
+    lib.utils.checkCredentials();
+    lib.notes.remove(issueKey, messageKey, options);
+  });
+
+program
+  .command("notes [issueKey]")
   .description("Fetch notes")
-  .action((options) => {
-    lib.notes.issues(options);
+  .action((issueKey, options) => {
+    lib.notes.issues(issueKey, options);
   });
 
 program.parse(process.argv);
