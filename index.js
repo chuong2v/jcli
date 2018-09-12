@@ -108,6 +108,7 @@ program
 program
   .command("notes [issueKey]")
   .description("Fetch notes")
+  .option("--notes-key <notesKey>", "notes key")
   .action((issueKey, options) => {
     lib.notes.get(issueKey, options);
   });
