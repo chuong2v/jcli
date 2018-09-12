@@ -109,7 +109,7 @@ program
   .command("notes [issueKey]")
   .description("Fetch notes")
   .action((issueKey, options) => {
-    lib.notes.issues(issueKey, options);
+    lib.notes.get(issueKey, options);
   });
 
 program.parse(process.argv);
